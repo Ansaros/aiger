@@ -1,69 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AR.js QR Video Player</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Frame Look at Video</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.0/aframe/build/aframe-ar.js"></script>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-      #loading {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 2em;
-      }
-    </style>
   </head>
   <body>
-    <div id="loading">Loading AR Experience...</div>
+    <a-scene>
+      <!-- Camera -->
+      <a-entity camera look-controls></a-entity>
 
-    <a-scene
-      embedded
-      arjs="sourceType: webcam; detectionMode: mono_and_matrix;"
-      vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true;"
-    >
-      <!-- Define your marker QR code -->
-      <a-marker type="pattern" url="qr-marker.patt">
-        <!-- Add video entity -->
-        <a-video
-          src="#video"
-          position="0 0.5 0"
-          rotation="-90 0 0"
-          width="1"
-          height="0.5"
-          autoplay
-          loop
-        ></a-video>
-      </a-marker>
+      <!-- Image Target -->
+      <a-image 
+        id="image-target"
+        src="image.jpg"
+        position="0 1.5 -3"
+        width="2" 
+        height="1.5"
+        look-at="[camera]"
+        material="shader: flat">
+      </a-image>
 
-      <a-entity camera></a-entity>
+      <!-- Video -->
+      <a-video 
+        id="video-element"
+        src="#video-file"
+        position="0 1.5 -3"
+        width="2" 
+        height="1.5"
+        visible="false">
+      </a-video>
+
+      <!-- Define Video File -->
+      <video id="video-file" src="video.mp4" style="display:none"></video>
+
     </a-scene>
 
-    <!-- Define video element outside of the AR scene -->
-    <video
-      id="video"
-      src="video.mp4"
-      style="display: none"
-      crossorigin="anonymous"
-    ></video>
-
     <script>
-      window.onload = function () {
-        // Hide the loading screen once AR.js is ready
-        const loadingScreen = document.getElementById("loading");
-        loadingScreen.style.display = "none";
-      };
+      // Reference to the image and video
+      const image = document.querySelector('#image-target');
+      const video = document.querySelector('#video-element');
+      const videoFile = document.querySelector('#video-file');
+
+      // Add event listener for raycaster intersection with image
+      image.addEventListener('raycaster-intersected', function () {
+        video.setAttribute('visible', true); // Show the video
+        videoFile.play();                    // Play the video
+      });
+
+      // Add event listener for raycaster intersection cleared
+      image.addEventListener('raycaster-intersected-cleared', function () {
+        videoFile.pause();                   // Pause the video
+        video.setAttribute('visible', false); // Hide the video
+      });
     </script>
   </body>
 </html>
